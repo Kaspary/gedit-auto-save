@@ -28,3 +28,4 @@ sudo glib-compile-schemas /usr/share/glib-2.0/schemas/
 - https://github.com/raelgc/gedit-restore-tabs
 - https://gedit-technology.github.io/apps/gedit/
 - https://github.com/bndn/gedit-plugins
+- https://valadoc.org/gedit/Gedit.Window.html

@@ -8,6 +8,7 @@ __all__ = ["SASViewActivatable", "SASWindowActivatable", "SASPreferences"]
 SCHEMA_ID = "org.gnome.gedit.plugins.sasplugin"
 DEFAULT_TMP_FOLDER = "~/Documents/.gedit/"
 
+
 class SASPreferences(GObject.Object, PeasGtk.Configurable):
     __gtype_name__ = "SASPreferences"
     object = GObject.property(type=GObject.Object)
@@ -46,7 +47,9 @@ class SASViewActivatable(GObject.Object, Gedit.ViewActivatable):
 
     def do_activate(self):
         """Activate the plugin and connect document changed signal."""
-        self.document_changed_handler_id = self.document.connect("changed", self.document_changed)
+        self.document_changed_handler_id = self.document.connect(
+            "changed", self.document_changed
+        )
 
     def do_deactivate(self):
         """Deactivate the plugin and disconnect document changed signal."""
@@ -57,7 +60,9 @@ class SASViewActivatable(GObject.Object, Gedit.ViewActivatable):
         if self.timeout_id is not None:
             GObject.source_remove(self.timeout_id)
 
-        self.timeout_id = GObject.timeout_add(500, self.maybe_save, priority=GObject.PRIORITY_LOW)
+        self.timeout_id = GObject.timeout_add(
+            500, self.maybe_save, priority=GObject.PRIORITY_LOW
+        )
 
     def maybe_save(self):
         """Save the document if conditions are met."""
@@ -91,7 +96,7 @@ class SASWindowActivatable(GObject.Object, Gedit.WindowActivatable):
             self.window.connect("focus-out-event", self.focus_out),
             self.window.connect("tab-removed", self.tab_removed),
             self.window.connect("delete-event", self.on_window_delete_event),
-            self.window.connect("show", self.on_window_show)
+            self.window.connect("show", self.on_window_show),
         ]
 
     def do_deactivate(self):
@@ -112,24 +117,38 @@ class SASWindowActivatable(GObject.Object, Gedit.WindowActivatable):
         if not self.is_closing:
             document = tab.get_document()
             file = document.get_file()
-            if file and file.get_location() and ".gedit" in file.get_location().get_path():
+            if (
+                file
+                and file.get_location()
+                and ".gedit" in file.get_location().get_path()
+            ):
                 dialog = Gtk.MessageDialog(
                     transient_for=self.window,
                     flags=0,
                     message_type=Gtk.MessageType.QUESTION,
-                    buttons=Gtk.ButtonsType.YES_NO,
+                    buttons=Gtk.ButtonsType.NONE,
                     text="Salvar documento?",
                 )
+                dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+                dialog.add_button(Gtk.STOCK_NO, Gtk.ResponseType.NO)
+                dialog.add_button(Gtk.STOCK_YES, Gtk.ResponseType.YES)
                 dialog.format_secondary_text(
                     "Você deseja salvar as alterações feitas no documento?"
                 )
                 response = dialog.run()
-                if response == Gtk.ResponseType.NO:
+                if response == Gtk.ResponseType.YES:
+                    document.save(Gedit.SAVE_FLAG_NONE)
+                elif response == Gtk.ResponseType.NO:
                     try:
                         file_path = file.get_location().get_path()
                         subprocess.run(["gio", "trash", file_path])
                     except Exception as e:
                         print(f"Erro ao mover o arquivo para a lixeira: {e}")
+                else:
+                    Gedit.commands_load_locations(
+                        window, [file.get_location()], None, 0, 0
+                    )
+
                 dialog.destroy()
 
     def on_window_delete_event(self, window, event):
@@ -152,12 +171,12 @@ class SASWindowActivatable(GObject.Object, Gedit.WindowActivatable):
         if os.path.isdir(folder_path):
             locations = []
             for filename in os.listdir(folder_path):
-                if filename.endswith('.txt') or filename.endswith('.md'):
+                if filename.endswith(".txt") or filename.endswith(".md"):
                     uri = os.path.join(folder_path, filename)
                     location = Gio.file_new_for_uri(f"file://{uri}")
                     if location.query_exists():
                         locations.append(location)
-            
+
             if locations:
                 locations.sort()
                 Gedit.commands_load_locations(window, locations, None, 0, 0)
@@ -194,6 +213,7 @@ def _get_tmp_folder():
     tmp_folder = settings.get_string("tmp-folder") if settings else DEFAULT_TMP_FOLDER
     return tmp_folder
 
+
 def _get_settings(schema):
     if not _is_schema_installed():
         print("Settings schema is not installed")
@@ -203,6 +223,7 @@ def _get_settings(schema):
     except Exception as e:
         print(e)
 
+
 def _is_schema_installed():
-        """Check if the GSettings schema is installed."""
-        return SCHEMA_ID in Gio.Settings.list_schemas()
+    """Check if the GSettings schema is installed."""
+    return SCHEMA_ID in Gio.Settings.list_schemas()
