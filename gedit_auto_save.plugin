@@ -1,0 +1,10 @@
+[Plugin]
+Loader=python3
+Module=gedit_auto_save
+IAge=3
+Name=Auto Save
+Icon=cache_autosave
+Description=An plugin to autosave new documents to temporary files
+Authors=João Pedro Kaspary
+Copyright=João Pedro Kaspary, 2024
+Website=https://github.com/kaspary/gedit-auto-save

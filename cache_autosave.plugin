@@ -1,9 +1,0 @@
-[Plugin]
-Loader=python3
-Module=cache_autosave
-IAge=3
-Name=Cache Autosave
-Icon=cache_autosave
-Description=An plugin to autosave new documents to temporary files in ~/Documents/.gedit
-Authors=João Pedro Kaspary
-Copyright=

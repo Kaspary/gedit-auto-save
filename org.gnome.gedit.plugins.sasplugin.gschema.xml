@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.gedit.plugins.sasplugin" path="/org/gnome/gedit/plugins/sasplugin/">
+    <key name="tmp-folder" type="s">
+      <default>'~/Documents/.gedit/'</default>
+      <summary>Temporary Files Folder</summary>
+      <description>The folder where temporary files will be saved.</description>
+    </key>
+  </schema>
+</schemalist>

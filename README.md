@@ -11,15 +11,20 @@ This Gedit plugin enhances your editing experience by introducing smart autosave
 With these functionalities, this plugin aims to provide a seamless and worry-free text editing experience.
 
 
+## Install schema settings:
+```bash
+sudo cp org.gnome.gedit.plugins.sasplugin.gschema.xml /usr/share/glib-2.0/schemas/
+sudo glib-compile-schemas /usr/share/glib-2.0/schemas/
+```
 
 ## References
-https://theawless.github.io/How-to-write-plugins-for-gedit/
-https://github.com/seanh/gedit-smart-autosave/blob/master/smart_autosave/plugin.py
-https://github.com/kgshank/gse-sound-output-device-chooser
-https://github.com/GNOME/pygobject
-https://docs.gtk.org/gtk3/enum.ButtonsType.html
-https://python-gtk-3-tutorial.readthedocs.io/en/latest/dialogs.html
-https://github.com/jefferyto/gedit-ex-mortis
-https://github.com/raelgc/gedit-restore-tabs
-https://gedit-technology.github.io/apps/gedit/
-https://github.com/bndn/gedit-plugins
+- https://theawless.github.io/How-to-write-plugins-for-gedit/
+- https://github.com/seanh/gedit-smart-autosave/blob/master/smart_autosave/plugin.py
+- https://github.com/kgshank/gse-sound-output-device-chooser
+- https://github.com/GNOME/pygobject
+- https://docs.gtk.org/gtk3/enum.ButtonsType.html
+- https://python-gtk-3-tutorial.readthedocs.io/en/latest/dialogs.html
+- https://github.com/jefferyto/gedit-ex-mortis
+- https://github.com/raelgc/gedit-restore-tabs
+- https://gedit-technology.github.io/apps/gedit/
+- https://github.com/bndn/gedit-plugins

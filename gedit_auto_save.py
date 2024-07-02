@@ -1,11 +1,38 @@
 import os
 from datetime import datetime
 import subprocess
-from gi.repository import GObject, Gedit, Gio, Gtk
+from gi.repository import GObject, Gedit, Gio, Gtk, PeasGtk
 
-__all__ = ["SASViewActivatable", "SASWindowActivatable"]
+__all__ = ["SASViewActivatable", "SASWindowActivatable", "SASPreferences"]
 
-TMP_FOLDER = '~/Documents/.gedit/'
+SCHEMA_ID = "org.gnome.gedit.plugins.sasplugin"
+DEFAULT_TMP_FOLDER = "~/Documents/.gedit/"
+
+class SASPreferences(GObject.Object, PeasGtk.Configurable):
+    __gtype_name__ = "SASPreferences"
+    object = GObject.property(type=GObject.Object)
+
+    def do_create_configure_widget(self):
+        """Create preferences dialog for setting temporary folder path."""
+        vbox = Gtk.VBox(spacing=6)
+
+        label = Gtk.Label(label="Temporary Files Folder:")
+        vbox.pack_start(label, False, False, 0)
+
+        self.entry = Gtk.Entry()
+        self.entry.set_text(_get_tmp_folder())
+        vbox.pack_start(self.entry, False, False, 0)
+
+        save_button = Gtk.Button(label="Save")
+        save_button.connect("clicked", self._on_save_clicked)
+        vbox.pack_start(save_button, False, False, 0)
+
+        return vbox
+
+    def _on_save_clicked(self, button):
+        """Save the temporary folder path to settings."""
+        settings = _get_settings(SCHEMA_ID)
+        settings.set_string("tmp-folder", self.entry.get_text())
 
 
 class SASViewActivatable(GObject.Object, Gedit.ViewActivatable):
@@ -121,7 +148,7 @@ class SASWindowActivatable(GObject.Object, Gedit.WindowActivatable):
 
     def restore_tabs(self, window):
         """Restore tabs from the temporary folder."""
-        folder_path = os.path.expanduser(TMP_FOLDER)
+        folder_path = os.path.expanduser(_get_tmp_folder())
         if os.path.isdir(folder_path):
             locations = []
             for filename in os.listdir(folder_path):
@@ -148,7 +175,7 @@ def maybe_save(window):
         if file.is_externally_modified():
             continue
         if not file.get_location():
-            save_path = os.path.expanduser(TMP_FOLDER)
+            save_path = os.path.expanduser(_get_tmp_folder())
             os.makedirs(save_path, exist_ok=True)
             timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
             temp_file_name = f"{timestamp}.txt"
@@ -160,3 +187,22 @@ def maybe_save(window):
             continue
         Gedit.commands_save_document_async(document, window)
 
+
+def _get_tmp_folder():
+    """Get the current temporary folder path from settings."""
+    settings = _get_settings(SCHEMA_ID)
+    tmp_folder = settings.get_string("tmp-folder") if settings else DEFAULT_TMP_FOLDER
+    return tmp_folder
+
+def _get_settings(schema):
+    if not _is_schema_installed():
+        print("Settings schema is not installed")
+        return None
+    try:
+        return Gio.Settings.new(schema)
+    except Exception as e:
+        print(e)
+
+def _is_schema_installed():
+        """Check if the GSettings schema is installed."""
+        return SCHEMA_ID in Gio.Settings.list_schemas()
